@@ -5,6 +5,7 @@ fn main() {
     calculate_left_right_list_distance();
     calculate_left_right_list_similarity_score();
     sum_safe_reports();
+    sum_safe_reports_with_problem_dampener();
 }
 
 fn calculate_left_right_list_distance() {
@@ -66,24 +67,45 @@ fn get_reports(input: &str) -> Vec<Vec<u64>> {
         .collect()
 }
 
+fn is_report_safe(levels: &[u64]) -> bool {
+    // A report is safe if:
+    // 1. All levels are in increasing or decreasing order
+    // 2. A level differs from its predecessor by at least one and at most three
+    (levels.windows(2).all(|w| w[0] < w[1]) || levels.windows(2).all(|w| w[0] > w[1]))
+        && levels.windows(2).all(|w| w[0].abs_diff(w[1]) <= 3)
+}
+
 fn sum_safe_reports() {
     let safe_reports = get_reports("input/day2.txt")
         .into_iter()
         .filter_map(|levels| {
-            // A report is safe if:
-            // 1. All levels are in increasing or decreasing order
-            // 2. A level differs from its predecessor by at least one and at most three
-            if (levels.windows(2).all(|w| w[0] < w[1]) || levels.windows(2).all(|w| w[0] > w[1]))
-                && levels.windows(2).all(|w| w[0].abs_diff(w[1]) <= 3)
-            {
+            if is_report_safe(levels.as_slice()) {
                 Some(levels)
             } else {
                 None
             }
         });
 
-    println!(
-        "The number of safe reports is {}",
-        safe_reports.count()
-    );
+    println!("The number of safe reports is {}", safe_reports.count());
+}
+
+fn sum_safe_reports_with_problem_dampener() {
+    let reports = get_reports("input/day2.txt");
+    let safe_reports = reports.into_iter().filter_map(|levels| {
+        if is_report_safe(levels.as_slice()) {
+            Some(levels)
+        } else {
+            for i in 0..levels.len() {
+                let mut levels = levels.clone();
+                levels.remove(i);
+                if is_report_safe(levels.as_slice()) {
+                    return Some(levels);
+                }
+            }
+
+            None
+        }
+    });
+
+    println!("The number of safe reports is {}", safe_reports.count());
 }
