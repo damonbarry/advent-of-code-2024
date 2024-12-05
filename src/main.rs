@@ -4,6 +4,7 @@ use std::fs;
 fn main() {
     calculate_left_right_list_distance();
     calculate_left_right_list_similarity_score();
+    sum_safe_reports();
 }
 
 fn calculate_left_right_list_distance() {
@@ -50,5 +51,28 @@ fn calculate_left_right_list_similarity_score() {
     println!(
         "The similarity score of the left and right lists is {}",
         similarity_score
+    );
+}
+
+fn sum_safe_reports() {
+    let input = fs::read_to_string("input/day2.txt").unwrap();
+    let lines = input.lines();
+    let reports = lines.map(|l| {
+        let levels: Vec<_> = l
+            .split_ascii_whitespace()
+            .map(|id| id.parse::<u64>().unwrap())
+            .collect();
+        // A report is safe if:
+        // 1. All levels are in increasing or decreasing order
+        // 2. A level differs from its predecessor by at least one and at most three
+        let safe = (levels.windows(2).all(|w| w[0] < w[1])
+            || levels.windows(2).all(|w| w[0] > w[1]))
+            && levels.windows(2).all(|w| w[0].abs_diff(w[1]) <= 3);
+        safe
+    });
+
+    println!(
+        "The number of safe reports is {}",
+        reports.filter(|&is_safe| is_safe).count()
     );
 }
