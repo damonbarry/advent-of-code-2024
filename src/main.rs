@@ -54,25 +54,36 @@ fn calculate_left_right_list_similarity_score() {
     );
 }
 
-fn sum_safe_reports() {
-    let input = fs::read_to_string("input/day2.txt").unwrap();
+fn get_reports(input: &str) -> Vec<Vec<u64>> {
+    let input = fs::read_to_string(input).unwrap();
     let lines = input.lines();
-    let reports = lines.map(|l| {
-        let levels: Vec<_> = l
-            .split_ascii_whitespace()
-            .map(|id| id.parse::<u64>().unwrap())
-            .collect();
-        // A report is safe if:
-        // 1. All levels are in increasing or decreasing order
-        // 2. A level differs from its predecessor by at least one and at most three
-        let safe = (levels.windows(2).all(|w| w[0] < w[1])
-            || levels.windows(2).all(|w| w[0] > w[1]))
-            && levels.windows(2).all(|w| w[0].abs_diff(w[1]) <= 3);
-        safe
-    });
+    lines
+        .map(|l| -> Vec<u64> {
+            l.split_ascii_whitespace()
+                .map(|id| id.parse::<u64>().unwrap())
+                .collect()
+        })
+        .collect()
+}
+
+fn sum_safe_reports() {
+    let safe_reports = get_reports("input/day2.txt")
+        .into_iter()
+        .filter_map(|levels| {
+            // A report is safe if:
+            // 1. All levels are in increasing or decreasing order
+            // 2. A level differs from its predecessor by at least one and at most three
+            if (levels.windows(2).all(|w| w[0] < w[1]) || levels.windows(2).all(|w| w[0] > w[1]))
+                && levels.windows(2).all(|w| w[0].abs_diff(w[1]) <= 3)
+            {
+                Some(levels)
+            } else {
+                None
+            }
+        });
 
     println!(
         "The number of safe reports is {}",
-        reports.filter(|&is_safe| is_safe).count()
+        safe_reports.count()
     );
 }
