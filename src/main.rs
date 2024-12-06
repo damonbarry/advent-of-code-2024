@@ -207,12 +207,12 @@ fn sum_xmas_words() {
                 // Found an 'X', now search in all directions for 'M', 'A', 'S'
 
                 // Search for horizontal right
-                if j < line.len() - 3 && &line[j+1..j+4] == "MAS" {
+                if j < line.len() - 3 && &line[j + 1..j + 4] == "MAS" {
                     xmas_words += 1;
                 }
 
                 // Search for horizontal left
-                if j >= 3 && &line[j-3..j] == "SAM" {
+                if j >= 3 && &line[j - 3..j] == "SAM" {
                     xmas_words += 1;
                 }
 
@@ -235,7 +235,8 @@ fn sum_xmas_words() {
                 }
 
                 // Search diagonal descending right
-                if i < lines.len() - 3 && j < line.len() - 3
+                if i < lines.len() - 3
+                    && j < line.len() - 3
                     && lines[i + 1].chars().nth(j + 1).unwrap() == 'M'
                     && lines[i + 2].chars().nth(j + 2).unwrap() == 'A'
                     && lines[i + 3].chars().nth(j + 3).unwrap() == 'S'
@@ -244,7 +245,8 @@ fn sum_xmas_words() {
                 }
 
                 // Search diagonal descending left
-                if i < lines.len() - 3 && j >= 3
+                if i < lines.len() - 3
+                    && j >= 3
                     && lines[i + 1].chars().nth(j - 1).unwrap() == 'M'
                     && lines[i + 2].chars().nth(j - 2).unwrap() == 'A'
                     && lines[i + 3].chars().nth(j - 3).unwrap() == 'S'
@@ -253,7 +255,8 @@ fn sum_xmas_words() {
                 }
 
                 // Search diagonal ascending right
-                if i >= 3 && j < line.len() - 3
+                if i >= 3
+                    && j < line.len() - 3
                     && lines[i - 1].chars().nth(j + 1).unwrap() == 'M'
                     && lines[i - 2].chars().nth(j + 2).unwrap() == 'A'
                     && lines[i - 3].chars().nth(j + 3).unwrap() == 'S'
@@ -262,7 +265,8 @@ fn sum_xmas_words() {
                 }
 
                 // Search diagonal ascending left
-                if i >= 3 && j >= 3
+                if i >= 3
+                    && j >= 3
                     && lines[i - 1].chars().nth(j - 1).unwrap() == 'M'
                     && lines[i - 2].chars().nth(j - 2).unwrap() == 'A'
                     && lines[i - 3].chars().nth(j - 3).unwrap() == 'S'
