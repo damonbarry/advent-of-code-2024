@@ -6,6 +6,7 @@ fn main() {
     calculate_left_right_list_similarity_score();
     sum_safe_reports();
     sum_safe_reports_with_problem_dampener();
+    sum_uncorrupted_mul_instructions();
 }
 
 fn calculate_left_right_list_distance() {
@@ -108,4 +109,46 @@ fn sum_safe_reports_with_problem_dampener() {
     });
 
     println!("The number of safe reports is {}", safe_reports.count());
+}
+
+fn sum_uncorrupted_mul_instructions() {
+    let input = fs::read_to_string("input/day3.txt").unwrap();
+    let sum: u64 = input
+        .as_bytes()
+        .windows(4)
+        .enumerate()
+        .filter_map(|(i, w)| {
+            if w[0] == b'm' && w[1] == b'u' && w[2] == b'l' && w[3] == b'(' {
+                let argp = i + 4;
+                let mut j = argp;
+
+                while input.as_bytes()[j].is_ascii_digit() {
+                    j += 1;
+                }
+
+                if j - argp == 0 || input.as_bytes()[j] != b',' {
+                    return None;
+                }
+
+                let arg1 = input[argp..j].parse::<u64>().unwrap();
+                let argp = j + 1;
+                j = argp;
+
+                while input.as_bytes()[j].is_ascii_digit() {
+                    j += 1;
+                }
+
+                if j - argp == 0 || input.as_bytes()[j] != b')' {
+                    return None;
+                }
+
+                let arg2 = input[argp..j].parse::<u64>().unwrap();
+                Some(arg1 * arg2)
+            } else {
+                None
+            }
+        })
+        .sum();
+
+    println!("The sum of uncorrupted mul instructions is {}", sum);
 }
