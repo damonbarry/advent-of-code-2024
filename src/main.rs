@@ -198,11 +198,10 @@ fn sum_xmas_words() {
 
     // input file can be visualized as a 2D grid of characters
     let input = fs::read_to_string("input/day4.txt").unwrap();
-    let lines = input.lines();
-    let ci = input.lines().count();
+    let lines: Vec<_> = input.lines().collect();
 
     // visit each cell in the grid looking for an 'X' character
-    for (i, line) in lines.enumerate() {
+    for (i, line) in input.lines().enumerate() {
         for (j, c) in line.chars().enumerate() {
             if c == 'X' {
                 // Found an 'X', now search in all directions for 'M', 'A', 'S'
@@ -218,55 +217,55 @@ fn sum_xmas_words() {
                 }
 
                 // Search vertical descending
-                if i < ci - 3
-                    && input.lines().clone().nth(i + 1).unwrap().chars().nth(j).unwrap() == 'M'
-                    && input.lines().clone().nth(i + 2).unwrap().chars().nth(j).unwrap() == 'A'
-                    && input.lines().clone().nth(i + 3).unwrap().chars().nth(j).unwrap() == 'S'
+                if i < lines.len() - 3
+                    && lines[i + 1].chars().nth(j).unwrap() == 'M'
+                    && lines[i + 2].chars().nth(j).unwrap() == 'A'
+                    && lines[i + 3].chars().nth(j).unwrap() == 'S'
                 {
                     xmas_words += 1;
                 }
 
                 // Search vertical ascending
                 if i >= 3
-                    && input.lines().clone().nth(i - 1).unwrap().chars().nth(j).unwrap() == 'M'
-                    && input.lines().clone().nth(i - 2).unwrap().chars().nth(j).unwrap() == 'A'
-                    && input.lines().clone().nth(i - 3).unwrap().chars().nth(j).unwrap() == 'S'
+                    && lines[i - 1].chars().nth(j).unwrap() == 'M'
+                    && lines[i - 2].chars().nth(j).unwrap() == 'A'
+                    && lines[i - 3].chars().nth(j).unwrap() == 'S'
                 {
                     xmas_words += 1;
                 }
 
                 // Search diagonal descending right
-                if i < ci - 3 && j < line.len() - 3
-                    && input.lines().clone().nth(i + 1).unwrap().chars().nth(j + 1).unwrap() == 'M'
-                    && input.lines().clone().nth(i + 2).unwrap().chars().nth(j + 2).unwrap() == 'A'
-                    && input.lines().clone().nth(i + 3).unwrap().chars().nth(j + 3).unwrap() == 'S'
+                if i < lines.len() - 3 && j < line.len() - 3
+                    && lines[i + 1].chars().nth(j + 1).unwrap() == 'M'
+                    && lines[i + 2].chars().nth(j + 2).unwrap() == 'A'
+                    && lines[i + 3].chars().nth(j + 3).unwrap() == 'S'
                 {
                     xmas_words += 1;
                 }
 
                 // Search diagonal descending left
-                if i < ci - 3 && j >= 3
-                    && input.lines().clone().nth(i + 1).unwrap().chars().nth(j - 1).unwrap() == 'M'
-                    && input.lines().clone().nth(i + 2).unwrap().chars().nth(j - 2).unwrap() == 'A'
-                    && input.lines().clone().nth(i + 3).unwrap().chars().nth(j - 3).unwrap() == 'S'
+                if i < lines.len() - 3 && j >= 3
+                    && lines[i + 1].chars().nth(j - 1).unwrap() == 'M'
+                    && lines[i + 2].chars().nth(j - 2).unwrap() == 'A'
+                    && lines[i + 3].chars().nth(j - 3).unwrap() == 'S'
                 {
                     xmas_words += 1;
                 }
 
                 // Search diagonal ascending right
                 if i >= 3 && j < line.len() - 3
-                    && input.lines().clone().nth(i - 1).unwrap().chars().nth(j + 1).unwrap() == 'M'
-                    && input.lines().clone().nth(i - 2).unwrap().chars().nth(j + 2).unwrap() == 'A'
-                    && input.lines().clone().nth(i - 3).unwrap().chars().nth(j + 3).unwrap() == 'S'
+                    && lines[i - 1].chars().nth(j + 1).unwrap() == 'M'
+                    && lines[i - 2].chars().nth(j + 2).unwrap() == 'A'
+                    && lines[i - 3].chars().nth(j + 3).unwrap() == 'S'
                 {
                     xmas_words += 1;
                 }
 
                 // Search diagonal ascending left
                 if i >= 3 && j >= 3
-                    && input.lines().clone().nth(i - 1).unwrap().chars().nth(j - 1).unwrap() == 'M'
-                    && input.lines().clone().nth(i - 2).unwrap().chars().nth(j - 2).unwrap() == 'A'
-                    && input.lines().clone().nth(i - 3).unwrap().chars().nth(j - 3).unwrap() == 'S'
+                    && lines[i - 1].chars().nth(j - 1).unwrap() == 'M'
+                    && lines[i - 2].chars().nth(j - 2).unwrap() == 'A'
+                    && lines[i - 3].chars().nth(j - 3).unwrap() == 'S'
                 {
                     xmas_words += 1;
                 }
