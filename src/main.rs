@@ -9,6 +9,7 @@ fn main() {
     sum_uncorrupted_mul_instructions();
     sum_enabled_multiplications();
     sum_xmas_words();
+    sum_mas_in_the_shape_of_an_x();
 }
 
 fn calculate_left_right_list_distance() {
@@ -278,4 +279,62 @@ fn sum_xmas_words() {
     }
 
     println!("The sum of XMAS words is {}", xmas_words);
+}
+
+fn sum_mas_in_the_shape_of_an_x() {
+    let mut sum_x_mas = 0;
+
+    // input file can be visualized as a 2D grid of characters
+    let input = fs::read_to_string("input/day4.txt").unwrap();
+    let lines: Vec<_> = input.lines().collect();
+
+    // visit each cell in the grid looking for an 'A' character
+    for (i, line) in input.lines().enumerate() {
+        for (j, c) in line.chars().enumerate() {
+            if c == 'A' && i >= 1 && j >=1 && i < lines.len() - 1 && j < line.len() - 1 {
+                // Found an 'A', now search for any of the following patterns:
+                // (top) M M  (left) M S  (bottom) S S  (right) S M
+                //        A           A             A            A
+                //       S S         M S           M M          S M
+
+                // Search for top
+                if lines[i - 1].chars().nth(j - 1).unwrap() == 'M'
+                    && lines[i - 1].chars().nth(j + 1).unwrap() == 'M'
+                    && lines[i + 1].chars().nth(j - 1).unwrap() == 'S'
+                    && lines[i + 1].chars().nth(j + 1).unwrap() == 'S'
+                {
+                    sum_x_mas += 1;
+                }
+
+                // Search for left
+                if lines[i - 1].chars().nth(j - 1).unwrap() == 'M'
+                    && lines[i + 1].chars().nth(j - 1).unwrap() == 'M'
+                    && lines[i - 1].chars().nth(j + 1).unwrap() == 'S'
+                    && lines[i + 1].chars().nth(j + 1).unwrap() == 'S'
+                {
+                    sum_x_mas += 1;
+                }
+
+                // Search for bottom
+                if lines[i + 1].chars().nth(j - 1).unwrap() == 'M'
+                    && lines[i + 1].chars().nth(j + 1).unwrap() == 'M'
+                    && lines[i - 1].chars().nth(j - 1).unwrap() == 'S'
+                    && lines[i - 1].chars().nth(j + 1).unwrap() == 'S'
+                {
+                    sum_x_mas += 1;
+                }
+
+                // Search for right
+                if lines[i - 1].chars().nth(j + 1).unwrap() == 'M'
+                    && lines[i + 1].chars().nth(j + 1).unwrap() == 'M'
+                    && lines[i - 1].chars().nth(j - 1).unwrap() == 'S'
+                    && lines[i + 1].chars().nth(j - 1).unwrap() == 'S'
+                {
+                    sum_x_mas += 1;
+                }
+            }
+        }
+    }
+
+    println!("The sum of X-MAS is {}", sum_x_mas);
 }
