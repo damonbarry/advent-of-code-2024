@@ -8,6 +8,7 @@ fn main() {
     sum_safe_reports_with_problem_dampener();
     sum_uncorrupted_mul_instructions();
     sum_enabled_multiplications();
+    sum_xmas_words();
 }
 
 fn calculate_left_right_list_distance() {
@@ -190,4 +191,88 @@ fn sum_enabled_multiplications() {
     }
 
     println!("The sum of enabled multiplications is {}", sum);
+}
+
+fn sum_xmas_words() {
+    let mut xmas_words = 0;
+
+    // input file can be visualized as a 2D grid of characters
+    let input = fs::read_to_string("input/day4.txt").unwrap();
+    let lines = input.lines();
+    let ci = input.lines().count();
+
+    // visit each cell in the grid looking for an 'X' character
+    for (i, line) in lines.enumerate() {
+        for (j, c) in line.chars().enumerate() {
+            if c == 'X' {
+                // Found an 'X', now search in all directions for 'M', 'A', 'S'
+
+                // Search for horizontal right
+                if j < line.len() - 3 && &line[j+1..j+4] == "MAS" {
+                    xmas_words += 1;
+                }
+
+                // Search for horizontal left
+                if j >= 3 && &line[j-3..j] == "SAM" {
+                    xmas_words += 1;
+                }
+
+                // Search vertical descending
+                if i < ci - 3
+                    && input.lines().clone().nth(i + 1).unwrap().chars().nth(j).unwrap() == 'M'
+                    && input.lines().clone().nth(i + 2).unwrap().chars().nth(j).unwrap() == 'A'
+                    && input.lines().clone().nth(i + 3).unwrap().chars().nth(j).unwrap() == 'S'
+                {
+                    xmas_words += 1;
+                }
+
+                // Search vertical ascending
+                if i >= 3
+                    && input.lines().clone().nth(i - 1).unwrap().chars().nth(j).unwrap() == 'M'
+                    && input.lines().clone().nth(i - 2).unwrap().chars().nth(j).unwrap() == 'A'
+                    && input.lines().clone().nth(i - 3).unwrap().chars().nth(j).unwrap() == 'S'
+                {
+                    xmas_words += 1;
+                }
+
+                // Search diagonal descending right
+                if i < ci - 3 && j < line.len() - 3
+                    && input.lines().clone().nth(i + 1).unwrap().chars().nth(j + 1).unwrap() == 'M'
+                    && input.lines().clone().nth(i + 2).unwrap().chars().nth(j + 2).unwrap() == 'A'
+                    && input.lines().clone().nth(i + 3).unwrap().chars().nth(j + 3).unwrap() == 'S'
+                {
+                    xmas_words += 1;
+                }
+
+                // Search diagonal descending left
+                if i < ci - 3 && j >= 3
+                    && input.lines().clone().nth(i + 1).unwrap().chars().nth(j - 1).unwrap() == 'M'
+                    && input.lines().clone().nth(i + 2).unwrap().chars().nth(j - 2).unwrap() == 'A'
+                    && input.lines().clone().nth(i + 3).unwrap().chars().nth(j - 3).unwrap() == 'S'
+                {
+                    xmas_words += 1;
+                }
+
+                // Search diagonal ascending right
+                if i >= 3 && j < line.len() - 3
+                    && input.lines().clone().nth(i - 1).unwrap().chars().nth(j + 1).unwrap() == 'M'
+                    && input.lines().clone().nth(i - 2).unwrap().chars().nth(j + 2).unwrap() == 'A'
+                    && input.lines().clone().nth(i - 3).unwrap().chars().nth(j + 3).unwrap() == 'S'
+                {
+                    xmas_words += 1;
+                }
+
+                // Search diagonal ascending left
+                if i >= 3 && j >= 3
+                    && input.lines().clone().nth(i - 1).unwrap().chars().nth(j - 1).unwrap() == 'M'
+                    && input.lines().clone().nth(i - 2).unwrap().chars().nth(j - 2).unwrap() == 'A'
+                    && input.lines().clone().nth(i - 3).unwrap().chars().nth(j - 3).unwrap() == 'S'
+                {
+                    xmas_words += 1;
+                }
+            }
+        }
+    }
+
+    println!("The sum of XMAS words is {}", xmas_words);
 }
