@@ -7,6 +7,7 @@ fn main() {
     sum_safe_reports();
     sum_safe_reports_with_problem_dampener();
     sum_uncorrupted_mul_instructions();
+    sum_enabled_multiplications();
 }
 
 fn calculate_left_right_list_distance() {
@@ -151,4 +152,43 @@ fn sum_uncorrupted_mul_instructions() {
         .sum();
 
     println!("The sum of uncorrupted mul instructions is {}", sum);
+}
+
+fn sum_enabled_multiplications() {
+    let input = fs::read_to_string("input/day3.txt").unwrap();
+    let mut sum = 0;
+    let mut mul_enabled = true;
+
+    for (i, w) in input.as_bytes().windows(7).enumerate() {
+        if w[0] == b'd' && w[1] == b'o' && w[2] == b'(' && w[3] == b')' {
+            // parse do() instruction
+            mul_enabled = true;
+        } else if w[0] == b'd'
+            && w[1] == b'o'
+            && w[2] == b'n'
+            && w[3] == b'\''
+            && w[4] == b't'
+            && w[5] == b'('
+            && w[6] == b')'
+        {
+            // parse don't() instruction
+            mul_enabled = false;
+        } else if mul_enabled && w[0] == b'm' && w[1] == b'u' && w[2] == b'l' && w[3] == b'(' {
+            // parse mul(x,y) instruction
+            let argp = i + 4;
+            input[argp..].find(',').and_then(|j| {
+                input[argp..argp + j].parse::<u64>().ok().and_then(|arg1| {
+                    let argp = argp + j + 1;
+                    input[argp..].find(')').and_then(|j| {
+                        input[argp..argp + j].parse::<u64>().ok().map(|arg2| {
+                            println!("mul({},{}) = {}", arg1, arg2, arg1 * arg2);
+                            sum += arg1 * arg2;
+                        })
+                    })
+                })
+            });
+        }
+    }
+
+    println!("The sum of enabled multiplications is {}", sum);
 }
