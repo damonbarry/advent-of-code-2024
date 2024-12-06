@@ -291,7 +291,7 @@ fn sum_mas_in_the_shape_of_an_x() {
     // visit each cell in the grid looking for an 'A' character
     for (i, line) in input.lines().enumerate() {
         for (j, c) in line.chars().enumerate() {
-            if c == 'A' && i >= 1 && j >=1 && i < lines.len() - 1 && j < line.len() - 1 {
+            if c == 'A' && i >= 1 && j >= 1 && i < lines.len() - 1 && j < line.len() - 1 {
                 // Found an 'A', now search for any of the following patterns:
                 // (top) M M  (left) M S  (bottom) S S  (right) S M
                 //        A           A             A            A
