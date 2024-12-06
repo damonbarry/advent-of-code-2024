@@ -181,7 +181,6 @@ fn sum_enabled_multiplications() {
                     let argp = argp + j + 1;
                     input[argp..].find(')').and_then(|j| {
                         input[argp..argp + j].parse::<u64>().ok().map(|arg2| {
-                            println!("mul({},{}) = {}", arg1, arg2, arg1 * arg2);
                             sum += arg1 * arg2;
                         })
                     })
