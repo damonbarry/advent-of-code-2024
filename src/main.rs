@@ -11,6 +11,7 @@ fn main() {
     sum_xmas_words();
     sum_mas_in_the_shape_of_an_x();
     sum_middle_page_numbers_in_correctly_ordered_updates();
+    sum_middle_page_numbers_in_incorrectly_ordered_updates();
 }
 
 fn calculate_left_right_list_distance() {
@@ -407,4 +408,73 @@ fn sum_middle_page_numbers_in_correctly_ordered_updates() {
 
     let sum: u64 = valid_updates.iter().map(|u| u.get(u.len()/2).unwrap()).sum();
     println!("The sum of middle page numbers in correctly ordered updates is {}", sum);
+}
+
+fn sum_middle_page_numbers_in_incorrectly_ordered_updates() {
+    let input = fs::read_to_string("input/day5.txt").unwrap();
+    let lines = input.lines();
+    let mut page_ordering_rules = true;
+    let mut page_order: HashMap<u64, Vec<u64>> = HashMap::new();
+    let mut corrected_updates: Vec<Vec<u64>> = Vec::new();
+
+    for l in lines {
+        if l.is_empty() {
+            // found delimiter between page ordering rules and updates
+            page_ordering_rules = false;
+        } else if page_ordering_rules {
+            // parse page ordering rules, in the form "X|Y" where page #X comes before page #Y
+            let pages: Vec<u64> = l
+                .split("|")
+                .map(|part| part.parse::<u64>().unwrap())
+                .collect();
+            assert!(pages.len() == 2);
+
+            // Build a hash map with page numbers as keys, and with the list of page numbers that
+            // come before the key page number as values.
+            if !page_order.contains_key(&pages[1]) {
+                page_order.insert(
+                    pages[1],
+                    vec![pages[0]],
+                );
+            } else {
+                page_order.get_mut(&pages[1]).unwrap().push(pages[0]);
+            }
+        } else {
+            // Parse updates in the form "X, Y, ..." where X, Y, ... are page numbers
+            let parsed_updates: Vec<u64> = l
+                .split(',')
+                .map(|part| part.parse::<u64>().unwrap())
+                .collect(); 
+
+            // Build a new update that adheres to page ordering rules using the page numbers from
+            // the parsed update. Discard the parsed update if it doesn't match what we build here.
+            let mut new_updates = Vec::new();
+            for u in &parsed_updates {
+                if new_updates.len() == 0 {
+                    new_updates.push(*u);
+                } else {
+                    let mut inserted = false;
+                    for (i, new_u) in new_updates.iter().enumerate() {
+                        if page_order.get(&new_u).unwrap().contains(&u) {
+                            new_updates.insert(i, *u);
+                            inserted = true;
+                            break;
+                        }
+                    }
+
+                    if ! inserted {
+                        new_updates.push(*u);
+                    }
+                }
+            }
+
+            assert!(parsed_updates.len() == new_updates.len());
+            if parsed_updates != new_updates {
+                corrected_updates.push(new_updates);
+            }
+        }
+    }
+
+    let sum: u64 = corrected_updates.iter().map(|u| u.get(u.len()/2).unwrap()).sum();
+    println!("The sum of middle page numbers in (corrected) incorrectly ordered updates is {}", sum);
 }
