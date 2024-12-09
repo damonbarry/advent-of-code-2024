@@ -443,6 +443,65 @@ enum Direction {
     Left,
 }
 
+enum PatrolProtocolOutcome {
+    Move((usize, usize)),
+    Turn(Direction),
+    Exit,
+}
+
+fn patrol_protocol(
+    i: &usize,
+    j: &usize,
+    dir: &Direction,
+    lab_map: &Vec<Vec<char>>,
+) -> PatrolProtocolOutcome {
+    let mut new_i = *i;
+    let mut new_j = *j;
+
+    // the guard attempts to move one step forward
+    match *dir {
+        Direction::Up => {
+            if *i > 0 {
+                new_i -= 1;
+            }
+        }
+        Direction::Right => {
+            if *j < lab_map[*i].len() - 1 {
+                new_j += 1;
+            }
+        }
+        Direction::Down => {
+            if *i < lab_map.len() - 1 {
+                new_i += 1;
+            }
+        }
+        Direction::Left => {
+            if *j > 0 {
+                new_j -= 1;
+            }
+        }
+    }
+
+    if *i == new_i && *j == new_j {
+        // the gaurd exits the bounds of the lab
+        return PatrolProtocolOutcome::Exit;
+    }
+
+    if lab_map[new_i][new_j] == '#' {
+        // the guard encounters an obstacle, turns right 90 degrees
+        let next_direction = || match *dir {
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+        };
+
+        return PatrolProtocolOutcome::Turn(next_direction());
+    } else {
+        return PatrolProtocolOutcome::Move((new_i, new_j));
+    }
+}
+
 fn sum_visited_guard_positions() {
     let input = fs::read_to_string("input/day6.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
@@ -466,50 +525,14 @@ fn sum_visited_guard_positions() {
     let mut visits: Vec<(usize, usize)> = vec![(i, j)];
 
     loop {
-        let mut new_i = i;
-        let mut new_j = j;
-
-        // the guard attempts to move one step forward 
-        match dir {
-            Direction::Up => {
-                if i > 0 {
-                    new_i -= 1;
-                }
-            }
-            Direction::Right => {
-                if j < lab_map[i].len() - 1 {
-                    new_j += 1;
-                }
-            }
-            Direction::Down => {
-                if i < lab_map.len() - 1 {
-                    new_i += 1;
-                }
-            }
-            Direction::Left => {
-                if j > 0 {
-                    new_j -= 1;
-                }
-            }
+        match patrol_protocol(&i, &j, &dir, &lab_map) {
+            PatrolProtocolOutcome::Move((new_i, new_j)) => {
+                i = new_i;
+                j = new_j;
+                visits.push((i, j));
         }
-
-        if i == new_i && j == new_j {
-            // the gaurd exited the bounds of the lab
-            break;
-        }
-
-        if lab_map[new_i][new_j] == '#' {
-            // the guard encountered an obstacle, turns right 90 degrees
-            match dir {
-                Direction::Up => dir = Direction::Right,
-                Direction::Right => dir = Direction::Down,
-                Direction::Down => dir = Direction::Left,
-                Direction::Left => dir = Direction::Up,
-            }
-        } else {
-            visits.push((new_i, new_j));
-            i = new_i;
-            j = new_j;
+            PatrolProtocolOutcome::Turn(direction) => dir = direction,
+            PatrolProtocolOutcome::Exit => break,
         }
     }
 
