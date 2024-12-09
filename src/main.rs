@@ -344,7 +344,7 @@ fn sum_mas_in_the_shape_of_an_x() {
 #[derive(PartialEq)]
 enum UpdateTypes {
     OnlyCorrect,
-    OnlyFixed
+    OnlyFixed,
 }
 
 fn sum_middle_page_numbers_in_ordered_updates(update_type: UpdateTypes) {
@@ -369,10 +369,7 @@ fn sum_middle_page_numbers_in_ordered_updates(update_type: UpdateTypes) {
             // Build a hash map with page numbers as keys, and with the list of page numbers that
             // come before the key page number as values.
             if !page_order.contains_key(&pages[1]) {
-                page_order.insert(
-                    pages[1],
-                    vec![pages[0]],
-                );
+                page_order.insert(pages[1], vec![pages[0]]);
             } else {
                 page_order.get_mut(&pages[1]).unwrap().push(pages[0]);
             }
@@ -399,7 +396,7 @@ fn sum_middle_page_numbers_in_ordered_updates(update_type: UpdateTypes) {
                         }
                     }
 
-                    if ! inserted {
+                    if !inserted {
                         new_updates.push(*u);
                     }
                 }
@@ -414,8 +411,19 @@ fn sum_middle_page_numbers_in_ordered_updates(update_type: UpdateTypes) {
         }
     }
 
-    let sum: u64 = keep_updates.iter().map(|u| u.get(u.len()/2).unwrap()).sum();
-    println!("The sum of middle page numbers in {} ordered updates is {}", if update_type == UpdateTypes::OnlyCorrect { "correctly" } else { "(corrected) incorrectly" }, sum);
+    let sum: u64 = keep_updates
+        .iter()
+        .map(|u| u.get(u.len() / 2).unwrap())
+        .sum();
+    println!(
+        "The sum of middle page numbers in {} ordered updates is {}",
+        if update_type == UpdateTypes::OnlyCorrect {
+            "correctly"
+        } else {
+            "(corrected) incorrectly"
+        },
+        sum
+    );
 }
 
 fn sum_middle_page_numbers_in_correctly_ordered_updates() {
