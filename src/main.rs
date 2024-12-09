@@ -520,7 +520,6 @@ fn sum_visited_guard_positions() {
     };
 
     let (mut i, mut j) = find_guard().unwrap();
-
     let mut dir = Direction::Up;
     let mut visits: Vec<(usize, usize)> = vec![(i, j)];
 
