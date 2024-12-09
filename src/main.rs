@@ -12,6 +12,7 @@ fn main() {
     sum_mas_in_the_shape_of_an_x();
     sum_middle_page_numbers_in_correctly_ordered_updates();
     sum_middle_page_numbers_in_incorrectly_ordered_updates();
+    sum_visited_guard_positions();
 }
 
 fn calculate_left_right_list_distance() {
@@ -378,7 +379,7 @@ fn sum_middle_page_numbers_in_ordered_updates(update_type: UpdateTypes) {
             let parsed_updates: Vec<u64> = l
                 .split(',')
                 .map(|part| part.parse::<u64>().unwrap())
-                .collect(); 
+                .collect();
 
             // Build a new update that adheres to page ordering rules using the page numbers from
             // the parsed update. Discard the parsed update if it doesn't match what we build here.
@@ -432,4 +433,89 @@ fn sum_middle_page_numbers_in_correctly_ordered_updates() {
 
 fn sum_middle_page_numbers_in_incorrectly_ordered_updates() {
     sum_middle_page_numbers_in_ordered_updates(UpdateTypes::OnlyFixed);
+}
+
+#[derive(Debug)]
+enum Direction {
+    Up,
+    Right,
+    Down,
+    Left,
+}
+
+fn sum_visited_guard_positions() {
+    let input = fs::read_to_string("input/day6.txt").unwrap();
+    let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
+
+    // Find the initial position of the guard
+    let find_guard = || -> Option<(usize, usize)> {
+        for i in 0..lab_map.len() {
+            for j in 0..lab_map[i].len() {
+                if lab_map[i][j] == '^' {
+                    return Some((i, j));
+                }
+            }
+        }
+
+        None
+    };
+
+    let (mut i, mut j) = find_guard().unwrap();
+
+    let mut dir = Direction::Up;
+    let mut visits: Vec<(usize, usize)> = vec![(i, j)];
+
+    loop {
+        let mut new_i = i;
+        let mut new_j = j;
+
+        // the guard attempts to move one step forward 
+        match dir {
+            Direction::Up => {
+                if i > 0 {
+                    new_i -= 1;
+                }
+            }
+            Direction::Right => {
+                if j < lab_map[i].len() - 1 {
+                    new_j += 1;
+                }
+            }
+            Direction::Down => {
+                if i < lab_map.len() - 1 {
+                    new_i += 1;
+                }
+            }
+            Direction::Left => {
+                if j > 0 {
+                    new_j -= 1;
+                }
+            }
+        }
+
+        if i == new_i && j == new_j {
+            // the gaurd exited the bounds of the lab
+            break;
+        }
+
+        if lab_map[new_i][new_j] == '#' {
+            // the guard encountered an obstacle, turns right 90 degrees
+            match dir {
+                Direction::Up => dir = Direction::Right,
+                Direction::Right => dir = Direction::Down,
+                Direction::Down => dir = Direction::Left,
+                Direction::Left => dir = Direction::Up,
+            }
+        } else {
+            visits.push((new_i, new_j));
+            i = new_i;
+            j = new_j;
+        }
+    }
+
+    // remove duplicates to get distinct positions the guard visited
+    visits.sort();
+    visits.dedup();
+
+    println!("The sum of visited guard positions is {}", visits.len());
 }
