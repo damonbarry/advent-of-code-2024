@@ -435,7 +435,7 @@ fn sum_middle_page_numbers_in_incorrectly_ordered_updates() {
     sum_middle_page_numbers_in_ordered_updates(UpdateTypes::OnlyFixed);
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 enum Direction {
     Up,
     Right,
@@ -502,6 +502,30 @@ fn patrol_protocol(
     }
 }
 
+fn calulate_guard_route(
+    i: &usize,
+    j: &usize,
+    dir: &Direction,
+    lab_map: &Vec<Vec<char>>,
+) -> Vec<(usize, usize)> {
+    let mut i = *i;
+    let mut j = *j;
+    let mut dir = *dir;
+    let mut positions: Vec<(usize, usize)> = vec![(i, j)];
+
+    loop {
+        match patrol_protocol(&i, &j, &dir, &lab_map) {
+            PatrolProtocolOutcome::Move((new_i, new_j)) => {
+                i = new_i;
+                j = new_j;
+                positions.push((i, j));
+            }
+            PatrolProtocolOutcome::Turn(direction) => dir = direction,
+            PatrolProtocolOutcome::Exit => return positions,
+        }
+    }
+}
+
 fn sum_visited_guard_positions() {
     let input = fs::read_to_string("input/day6.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
@@ -519,25 +543,12 @@ fn sum_visited_guard_positions() {
         None
     };
 
-    let (mut i, mut j) = find_guard().unwrap();
-    let mut dir = Direction::Up;
-    let mut visits: Vec<(usize, usize)> = vec![(i, j)];
-
-    loop {
-        match patrol_protocol(&i, &j, &dir, &lab_map) {
-            PatrolProtocolOutcome::Move((new_i, new_j)) => {
-                i = new_i;
-                j = new_j;
-                visits.push((i, j));
-        }
-            PatrolProtocolOutcome::Turn(direction) => dir = direction,
-            PatrolProtocolOutcome::Exit => break,
-        }
-    }
+    let (i, j) = find_guard().unwrap();
+    let mut positions = calulate_guard_route(&i, &j, &Direction::Up, &lab_map);
 
     // remove duplicates to get distinct positions the guard visited
-    visits.sort();
-    visits.dedup();
+    positions.sort();
+    positions.dedup();
 
-    println!("The sum of visited guard positions is {}", visits.len());
+    println!("The sum of visited guard positions is {}", positions.len());
 }
