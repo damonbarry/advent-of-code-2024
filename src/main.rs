@@ -17,7 +17,7 @@ fn main() {
 }
 
 fn calculate_left_right_list_distance() {
-    let input = fs::read_to_string("input/day1.txt").unwrap();
+    let input = fs::read_to_string("src/input/day1.txt").unwrap();
     let lines = input.lines();
     let (mut left, mut right): (Vec<_>, Vec<_>) = lines
         .map(|l| -> (u64, u64) {
@@ -40,7 +40,7 @@ fn calculate_left_right_list_distance() {
 }
 
 fn calculate_left_right_list_similarity_score() {
-    let input = fs::read_to_string("input/day1.txt").unwrap();
+    let input = fs::read_to_string("src/input/day1.txt").unwrap();
     let lines = input.lines();
     let (left, right): (Vec<_>, Vec<_>) = lines
         .map(|l| -> (u64, u64) {
@@ -84,7 +84,7 @@ fn is_report_safe(levels: &[u64]) -> bool {
 }
 
 fn sum_safe_reports() {
-    let safe_reports = get_reports("input/day2.txt")
+    let safe_reports = get_reports("src/input/day2.txt")
         .into_iter()
         .filter_map(|levels| {
             if is_report_safe(levels.as_slice()) {
@@ -98,7 +98,7 @@ fn sum_safe_reports() {
 }
 
 fn sum_safe_reports_with_problem_dampener() {
-    let reports = get_reports("input/day2.txt");
+    let reports = get_reports("src/input/day2.txt");
     let safe_reports = reports.into_iter().filter_map(|levels| {
         if is_report_safe(levels.as_slice()) {
             Some(levels)
@@ -119,7 +119,7 @@ fn sum_safe_reports_with_problem_dampener() {
 }
 
 fn sum_uncorrupted_mul_instructions() {
-    let input = fs::read_to_string("input/day3.txt").unwrap();
+    let input = fs::read_to_string("src/input/day3.txt").unwrap();
     let sum: u64 = input
         .as_bytes()
         .windows(4)
@@ -161,7 +161,7 @@ fn sum_uncorrupted_mul_instructions() {
 }
 
 fn sum_enabled_multiplications() {
-    let input = fs::read_to_string("input/day3.txt").unwrap();
+    let input = fs::read_to_string("src/input/day3.txt").unwrap();
     let mut sum = 0;
     let mut mul_enabled = true;
 
@@ -202,7 +202,7 @@ fn sum_xmas_words() {
     let mut xmas_words = 0;
 
     // input file can be visualized as a 2D grid of characters
-    let input = fs::read_to_string("input/day4.txt").unwrap();
+    let input = fs::read_to_string("src/input/day4.txt").unwrap();
     let lines: Vec<_> = input.lines().collect();
 
     // visit each cell in the grid looking for an 'X' character
@@ -289,7 +289,7 @@ fn sum_mas_in_the_shape_of_an_x() {
     let mut sum_x_mas = 0;
 
     // input file can be visualized as a 2D grid of characters
-    let input = fs::read_to_string("input/day4.txt").unwrap();
+    let input = fs::read_to_string("src/input/day4.txt").unwrap();
     let lines: Vec<_> = input.lines().collect();
 
     // visit each cell in the grid looking for an 'A' character
@@ -350,7 +350,7 @@ enum UpdateTypes {
 }
 
 fn sum_middle_page_numbers_in_ordered_updates(update_type: UpdateTypes) {
-    let input = fs::read_to_string("input/day5.txt").unwrap();
+    let input = fs::read_to_string("src/input/day5.txt").unwrap();
     let lines = input.lines();
     let mut page_ordering_rules = true;
     let mut page_order: HashMap<u64, Vec<u64>> = HashMap::new();
@@ -588,7 +588,7 @@ fn calulate_guard_route(pos: &GuardPosition, lab_map: &Vec<Vec<char>>) -> GuardR
 }
 
 fn sum_visited_guard_positions() {
-    let input = fs::read_to_string("input/day6.txt").unwrap();
+    let input = fs::read_to_string("src/input/day6.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
     let (i, j) = find_guard(&lab_map).unwrap();
     let outcome = calulate_guard_route(&GuardPosition::new((i, j), Direction::Up), &lab_map);
@@ -611,7 +611,7 @@ fn sum_visited_guard_positions() {
 }
 
 fn sum_candidate_obstacle_positions() {
-    let input = fs::read_to_string("input/day6.txt").unwrap();
+    let input = fs::read_to_string("src/input/day6.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
     let (original_i, original_j) = find_guard(&lab_map).unwrap();
     let mut i = original_i;
