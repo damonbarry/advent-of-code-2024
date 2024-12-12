@@ -436,6 +436,18 @@ fn sum_middle_page_numbers_in_incorrectly_ordered_updates() {
     sum_middle_page_numbers_in_ordered_updates(UpdateTypes::OnlyFixed);
 }
 
+fn find_guard(lab_map: &Vec<Vec<char>>) -> Option<(usize, usize)> {
+    for i in 0..lab_map.len() {
+        for j in 0..lab_map[i].len() {
+            if lab_map[i][j] == '^' {
+                return Some((i, j));
+            }
+        }
+    }
+
+    None
+}
+
 #[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 enum Direction {
     Up,
@@ -578,21 +590,7 @@ fn calulate_guard_route(pos: &GuardPosition, lab_map: &Vec<Vec<char>>) -> GuardR
 fn sum_visited_guard_positions() {
     let input = fs::read_to_string("input/day6.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
-
-    // Find the initial position of the guard
-    let find_guard = || -> Option<(usize, usize)> {
-        for i in 0..lab_map.len() {
-            for j in 0..lab_map[i].len() {
-                if lab_map[i][j] == '^' {
-                    return Some((i, j));
-                }
-            }
-        }
-
-        None
-    };
-
-    let (i, j) = find_guard().unwrap();
+    let (i, j) = find_guard(&lab_map).unwrap();
     let outcome = calulate_guard_route(&GuardPosition::new((i, j), Direction::Up), &lab_map);
     if let GuardRouteOutcome::Positions(positions) = outcome {
         // remove duplicates coordinates to get distinct positions the guard visited (regarless of direction)
@@ -615,21 +613,7 @@ fn sum_visited_guard_positions() {
 fn sum_candidate_obstacle_positions() {
     let input = fs::read_to_string("input/day6.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
-
-    // Find the initial position of the guard
-    let find_guard = || -> Option<(usize, usize)> {
-        for i in 0..lab_map.len() {
-            for j in 0..lab_map[i].len() {
-                if lab_map[i][j] == '^' {
-                    return Some((i, j));
-                }
-            }
-        }
-
-        None
-    };
-
-    let (original_i, original_j) = find_guard().unwrap();
+    let (original_i, original_j) = find_guard(&lab_map).unwrap();
     let mut i = original_i;
     let mut j = original_j;
     let mut dir = Direction::Up;
