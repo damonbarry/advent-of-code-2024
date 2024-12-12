@@ -13,6 +13,7 @@ fn main() {
     sum_middle_page_numbers_in_correctly_ordered_updates();
     sum_middle_page_numbers_in_incorrectly_ordered_updates();
     sum_visited_guard_positions();
+    sum_candidate_obstacle_positions();
 }
 
 fn calculate_left_right_list_distance() {
@@ -435,7 +436,7 @@ fn sum_middle_page_numbers_in_incorrectly_ordered_updates() {
     sum_middle_page_numbers_in_ordered_updates(UpdateTypes::OnlyFixed);
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 enum Direction {
     Up,
     Right,
@@ -502,26 +503,74 @@ fn patrol_protocol(
     }
 }
 
-fn calulate_guard_route(
-    i: &usize,
-    j: &usize,
-    dir: &Direction,
-    lab_map: &Vec<Vec<char>>,
-) -> Vec<(usize, usize)> {
-    let mut i = *i;
-    let mut j = *j;
-    let mut dir = *dir;
-    let mut positions: Vec<(usize, usize)> = vec![(i, j)];
+enum GuardRouteOutcome {
+    Positions(Vec<GuardPosition>),
+    LoopDetected,
+}
+
+#[derive(Debug, Copy, Clone)]
+struct GuardPosition {
+    coordinates: (usize, usize),
+    direction: Direction,
+}
+
+impl GuardPosition {
+    pub fn new(coords: (usize, usize), dir: Direction) -> Self {
+        GuardPosition {
+            coordinates: coords,
+            direction: dir,
+        }
+    }
+}
+
+fn _print_guard_route(lab_map: &Vec<Vec<char>>, route: &Vec<GuardPosition>) {
+    let mut map = HashMap::new();
+    for pos in route {
+        map.entry(pos.coordinates).or_insert(vec![]).push(pos.direction);
+    }
+
+    for x in 0..lab_map.len() {
+        for y in 0..lab_map[0].len() {
+            match map.get(&(x, y)) {
+                Some(dir) => match dir.len() {
+                    0 => print!("?"),
+                    1 => match dir[0] {
+                        Direction::Up => print!("^"),
+                        Direction::Right => print!(">"),
+                        Direction::Down => print!("v"),
+                        Direction::Left => print!("<"),
+                    },
+                    l => print!("{}", l),
+                },
+                None => print!(".")
+            }
+        }
+        println!();
+    }
+}
+
+fn calulate_guard_route(pos: &GuardPosition, lab_map: &Vec<Vec<char>>) -> GuardRouteOutcome {
+    let (mut i, mut j) = pos.coordinates;
+    let mut dir = pos.direction;
+    let mut positions: Vec<GuardPosition> = vec![*pos];
 
     loop {
         match patrol_protocol(&i, &j, &dir, &lab_map) {
             PatrolProtocolOutcome::Move((new_i, new_j)) => {
                 i = new_i;
                 j = new_j;
-                positions.push((i, j));
+                match positions
+                    .binary_search_by(|p| p.coordinates.cmp(&(i, j)).then(p.direction.cmp(&dir)))
+                {
+                    Ok(_) => {
+                        // _print_guard_route(lab_map, &positions);
+                        return GuardRouteOutcome::LoopDetected;
+                    }
+                    Err(index) => positions.insert(index, GuardPosition::new((i, j), dir)),
+                }
             }
             PatrolProtocolOutcome::Turn(direction) => dir = direction,
-            PatrolProtocolOutcome::Exit => return positions,
+            PatrolProtocolOutcome::Exit => return GuardRouteOutcome::Positions(positions),
         }
     }
 }
@@ -544,11 +593,77 @@ fn sum_visited_guard_positions() {
     };
 
     let (i, j) = find_guard().unwrap();
-    let mut positions = calulate_guard_route(&i, &j, &Direction::Up, &lab_map);
+    let outcome = calulate_guard_route(&GuardPosition::new((i, j), Direction::Up), &lab_map);
+    if let GuardRouteOutcome::Positions(positions) = outcome {
+        // remove duplicates coordinates to get distinct positions the guard visited (regarless of direction)
+        let mut coordinates = positions
+            .into_iter()
+            .map(|p| p.coordinates)
+            .collect::<Vec<(usize, usize)>>();
+        coordinates.sort();
+        coordinates.dedup();
 
-    // remove duplicates to get distinct positions the guard visited
-    positions.sort();
-    positions.dedup();
+        println!(
+            "The sum of visited guard positions is {}",
+            coordinates.len()
+        );
+    } else {
+        panic!()
+    }
+}
 
-    println!("The sum of visited guard positions is {}", positions.len());
+fn sum_candidate_obstacle_positions() {
+    let input = fs::read_to_string("input/day6.txt").unwrap();
+    let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
+
+    // Find the initial position of the guard
+    let find_guard = || -> Option<(usize, usize)> {
+        for i in 0..lab_map.len() {
+            for j in 0..lab_map[i].len() {
+                if lab_map[i][j] == '^' {
+                    return Some((i, j));
+                }
+            }
+        }
+
+        None
+    };
+
+    let (original_i, original_j) = find_guard().unwrap();
+    let mut i = original_i;
+    let mut j = original_j;
+    let mut dir = Direction::Up;
+    let mut obstacles: Vec<(usize, usize)> = vec![];
+
+    loop {
+        match patrol_protocol(&i, &j, &dir, &lab_map) {
+            PatrolProtocolOutcome::Move((new_i, new_j)) => {
+                i = new_i;
+                j = new_j;
+
+                // add a candidate obstacle at the current position and look for an infinite loop
+                let mut altered_lab_map = lab_map.clone();
+                assert!(altered_lab_map[i][j] != '#');
+                altered_lab_map[i][j] = '#';
+                let outcome = calulate_guard_route(
+                    &GuardPosition::new((original_i, original_j), Direction::Up),
+                    &altered_lab_map,
+                );
+
+                if let GuardRouteOutcome::LoopDetected = outcome {
+                    match obstacles.binary_search(&(i, j)) {
+                        Ok(_) => (),
+                        Err(index) => obstacles.insert(index, (i, j)),
+                    }
+                }
+            }
+            PatrolProtocolOutcome::Turn(direction) => dir = direction,
+            PatrolProtocolOutcome::Exit => break,
+        }
+    }
+
+    println!(
+        "The sum of candidate obstacle positions is {}",
+        obstacles.len()
+    );
 }
