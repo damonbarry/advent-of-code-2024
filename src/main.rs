@@ -13,7 +13,8 @@ fn main() {
     sum_middle_page_numbers_in_correctly_ordered_updates();
     sum_middle_page_numbers_in_incorrectly_ordered_updates();
     sum_visited_guard_positions();
-    sum_candidate_obstacle_positions();
+    // day 6 part 2 takes about 10 seconds to run; disable for now
+    // _sum_candidate_obstacle_positions();
 }
 
 fn calculate_left_right_list_distance() {
@@ -610,7 +611,7 @@ fn sum_visited_guard_positions() {
     }
 }
 
-fn sum_candidate_obstacle_positions() {
+fn _sum_candidate_obstacle_positions() {
     let input = fs::read_to_string("src/input/day6.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
     let (original_i, original_j) = find_guard(&lab_map).unwrap();
