@@ -656,7 +656,7 @@ fn _sum_candidate_obstacle_positions() {
     );
 }
 
-fn sum_bridge_calibrations_from_operations(operator_set: &Vec<char>) {
+fn sum_bridge_calibrations_from_operations(operator_set: &Vec<&str>) {
     let input = fs::read_to_string("src/input/day7.txt").unwrap();
     let total: u64 = input
         .lines()
@@ -677,7 +677,7 @@ fn sum_bridge_calibrations_from_operations(operator_set: &Vec<char>) {
                         .skip(1)
                         .enumerate()
                         .fold(operands[0], |lhs, (i, rhs)| {
-                            if *operators[i] == '+' {
+                            if *operators[i] == "+" {
                                 lhs + rhs
                             } else {
                                 lhs * rhs
@@ -697,5 +697,5 @@ fn sum_bridge_calibrations_from_operations(operator_set: &Vec<char>) {
 }
 
 fn sum_bridge_calibrations_from_two_operations() {
-    sum_bridge_calibrations_from_operations(&vec!['+', '*']);
+    sum_bridge_calibrations_from_operations(&vec!["+", "*"]);
 }
