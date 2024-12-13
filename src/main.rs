@@ -15,7 +15,7 @@ fn main() {
     sum_visited_guard_positions();
     // day 6 part 2 takes about 10 seconds to run; disable for now
     // _sum_candidate_obstacle_positions();
-    sum_bridge_calibrations();
+    sum_bridge_calibrations_from_two_operations();
 }
 
 fn calculate_left_right_list_distance() {
@@ -656,7 +656,7 @@ fn _sum_candidate_obstacle_positions() {
     );
 }
 
-fn sum_bridge_calibrations() {
+fn sum_bridge_calibrations_from_two_operations() {
     let input = fs::read_to_string("src/input/day7.txt").unwrap();
     let total: u64 = input
         .lines()
@@ -694,5 +694,5 @@ fn sum_bridge_calibrations() {
         })
         .sum();
 
-    println!("The sum of bridge calibrations is {}", total);
+    println!("The sum of bridge calibrations from operations '+' and '*' is {}", total);
 }
