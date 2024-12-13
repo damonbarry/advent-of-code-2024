@@ -656,7 +656,7 @@ fn _sum_candidate_obstacle_positions() {
     );
 }
 
-fn sum_bridge_calibrations_from_operations(operator_set: &Vec<&str>) {
+fn sum_bridge_calibrations_from_operations(operator_set: &Vec<(&str, fn(u64, u64) -> u64)>) {
     let input = fs::read_to_string("src/input/day7.txt").unwrap();
     let total: u64 = input
         .lines()
@@ -671,18 +671,11 @@ fn sum_bridge_calibrations_from_operations(operator_set: &Vec<&str>) {
                 .map(|_| operator_set)
                 .multi_cartesian_product()
             {
-                let result =
-                    operands
-                        .iter()
-                        .skip(1)
-                        .enumerate()
-                        .fold(operands[0], |lhs, (i, rhs)| {
-                            if *operators[i] == "+" {
-                                lhs + rhs
-                            } else {
-                                lhs * rhs
-                            }
-                        });
+                let result = operands
+                    .iter()
+                    .skip(1)
+                    .enumerate()
+                    .fold(operands[0], |lhs, (i, rhs)| operators[i].1(lhs, *rhs));
 
                 if result == value {
                     return Some(result);
@@ -693,9 +686,12 @@ fn sum_bridge_calibrations_from_operations(operator_set: &Vec<&str>) {
         })
         .sum();
 
-    println!("The sum of bridge calibrations from operations '+' and '*' is {}", total);
+    println!(
+        "The sum of bridge calibrations from operations '+' and '*' is {}",
+        total
+    );
 }
 
 fn sum_bridge_calibrations_from_two_operations() {
-    sum_bridge_calibrations_from_operations(&vec!["+", "*"]);
+    sum_bridge_calibrations_from_operations(&vec![("+", |l, r| l + r), ("*", |l, r| l * r)]);
 }
