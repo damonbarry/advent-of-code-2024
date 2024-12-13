@@ -15,6 +15,7 @@ fn main() {
     sum_visited_guard_positions();
     // day 6 part 2 takes about 10 seconds to run; disable for now
     // _sum_candidate_obstacle_positions();
+    sum_bridge_calibrations();
 }
 
 fn calculate_left_right_list_distance() {
@@ -539,7 +540,9 @@ impl GuardPosition {
 fn _print_guard_route(lab_map: &Vec<Vec<char>>, route: &Vec<GuardPosition>) {
     let mut map = HashMap::new();
     for pos in route {
-        map.entry(pos.coordinates).or_insert(vec![]).push(pos.direction);
+        map.entry(pos.coordinates)
+            .or_insert(vec![])
+            .push(pos.direction);
     }
 
     for x in 0..lab_map.len() {
@@ -555,7 +558,7 @@ fn _print_guard_route(lab_map: &Vec<Vec<char>>, route: &Vec<GuardPosition>) {
                     },
                     l => print!("{}", l),
                 },
-                None => print!(".")
+                None => print!("."),
             }
         }
         println!();
@@ -651,4 +654,45 @@ fn _sum_candidate_obstacle_positions() {
         "The sum of candidate obstacle positions is {}",
         obstacles.len()
     );
+}
+
+fn sum_bridge_calibrations() {
+    let input = fs::read_to_string("src/input/day7.txt").unwrap();
+    let total: u64 = input
+        .lines()
+        .filter_map(|l| {
+            let (value, operands): (&str, &str) = l.split(':').collect_tuple().unwrap();
+            let value = value.parse::<u64>().unwrap();
+            let operands: Vec<_> = operands
+                .split_whitespace()
+                .map(|o| o.parse::<u64>().unwrap())
+                .collect();
+            let operator_set = ['+', '*'];
+            for operators in (0..operands.len() - 1)
+                .map(|_| &operator_set)
+                .multi_cartesian_product()
+            {
+                let result =
+                    operands
+                        .iter()
+                        .skip(1)
+                        .enumerate()
+                        .fold(operands[0], |lhs, (i, rhs)| {
+                            if *operators[i] == '+' {
+                                lhs + rhs
+                            } else {
+                                lhs * rhs
+                            }
+                        });
+
+                if result == value {
+                    return Some(result);
+                }
+            }
+
+            None::<u64>
+        })
+        .sum();
+
+    println!("The sum of bridge calibrations is {}", total);
 }
