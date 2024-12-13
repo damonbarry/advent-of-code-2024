@@ -16,6 +16,7 @@ fn main() {
     // day 6 part 2 takes about 10 seconds to run; disable for now
     // _sum_candidate_obstacle_positions();
     sum_bridge_calibrations_from_two_operations();
+    sum_bridge_calibrations_from_three_operations();
 }
 
 fn calculate_left_right_list_distance() {
@@ -687,11 +688,22 @@ fn sum_bridge_calibrations_from_operations(operator_set: &Vec<(&str, fn(u64, u64
         .sum();
 
     println!(
-        "The sum of bridge calibrations from operations '+' and '*' is {}",
+        "The sum of bridge calibrations from operations {:?} is {}",
+        operator_set.iter().map(|o| o.0).collect::<Vec<_>>(),
         total
     );
 }
 
 fn sum_bridge_calibrations_from_two_operations() {
     sum_bridge_calibrations_from_operations(&vec![("+", |l, r| l + r), ("*", |l, r| l * r)]);
+}
+
+fn sum_bridge_calibrations_from_three_operations() {
+    sum_bridge_calibrations_from_operations(&vec![
+        ("+", |l, r| l + r),
+        ("*", |l, r| l * r),
+        ("||", |l, r| {
+            (l.to_string() + &r.to_string()).parse().unwrap()
+        }),
+    ]);
 }
