@@ -13,11 +13,13 @@ fn main() {
     sum_middle_page_numbers_in_correctly_ordered_updates();
     sum_middle_page_numbers_in_incorrectly_ordered_updates();
     sum_visited_guard_positions();
-    // day 6 part 2 takes about 10 seconds to run; disable for now
+    // day 6 part 2 is slow; disable for now
     // _sum_candidate_obstacle_positions();
     sum_bridge_calibrations_from_two_operations();
     sum_bridge_calibrations_from_three_operations();
-    sum_unique_antinode_locations();
+    // day 8 part 1 is slow; disable for now
+    // _sum_unique_antinode_locations();
+    sum_unique_antinode_locations_accounting_for_resonant_harmonics();
 }
 
 fn calculate_left_right_list_distance() {
@@ -709,7 +711,7 @@ fn sum_bridge_calibrations_from_three_operations() {
     ]);
 }
 
-fn sum_unique_antinode_locations() {
+fn _sum_unique_antinode_locations() {
     let input = fs::read_to_string("src/input/day8.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
     let mut antenna_locations: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
@@ -746,6 +748,66 @@ fn sum_unique_antinode_locations() {
             let antinode = (perm[1].0 as i64 - diff_x, perm[1].1 as i64 - diff_y);
             if in_bounds(antinode.0, antinode.1) {
                 antinodes.push((antinode.0 as usize, antinode.1 as usize));
+            }
+        }
+    }
+
+    println!("The sum of unique antinode locations is {}", antinodes.iter().unique().count());
+}
+
+fn sum_unique_antinode_locations_accounting_for_resonant_harmonics() {
+    let input = fs::read_to_string("src/input/day8.txt").unwrap();
+    let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
+    let mut antenna_locations: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
+    let mut antinodes: Vec<(usize, usize)> = vec![];
+
+    // Read the map, creating a hashmap of antenna frequencies (keys) and locations (values)
+    for i in 0..lab_map.len() {
+        for j in 0..lab_map[i].len() {
+            if lab_map[i][j].is_ascii_alphanumeric() {
+                antenna_locations
+                    .entry(lab_map[i][j])
+                    .or_insert(vec![])
+                    .push((i, j));
+            }
+        }
+    }
+
+    // For each pair of antennae at a given freqency, calculate their antinodes
+    for (_, locations) in antenna_locations.iter() {
+        for combo in locations.iter().combinations(2) {
+            let diff_x = combo[0].0 as i64 - combo[1].0 as i64;
+            let diff_y = combo[0].1 as i64 - combo[1].1 as i64;
+
+            // Save the antinodes if they are within the bounds of the map
+            let in_bounds = |x: i64, y: i64| {
+                x >= 0 && (x as usize) < lab_map.len() && y >= 0 && (y as usize) < lab_map[0].len()
+            };
+
+            // Search for antinodes in one direction
+            let (mut x, mut y) = (combo[0].0 as i64, combo[0].1 as i64);
+            antinodes.push((x as usize, y as usize)); // each antenna is an antinode
+            loop {
+                let antinode = (x + diff_x, y + diff_y);
+                if ! in_bounds(antinode.0, antinode.1) {
+                    break;
+                }
+
+                antinodes.push((antinode.0 as usize, antinode.1 as usize));
+                (x, y) = antinode;
+            }
+
+            // Search for antinodes in the other direction
+            let (mut x, mut y) = (combo[1].0 as i64, combo[1].1 as i64);
+            antinodes.push((x as usize, y as usize)); // each antenna is an antinode
+            loop {
+                let antinode = (x - diff_x, y - diff_y);
+                if ! in_bounds(antinode.0, antinode.1) {
+                    break;
+                }
+
+                antinodes.push((antinode.0 as usize, antinode.1 as usize));
+                (x, y) = antinode;
             }
         }
     }
