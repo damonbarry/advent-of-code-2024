@@ -19,7 +19,8 @@ fn main() {
     sum_bridge_calibrations_from_three_operations();
     // day 8 part 1 is slow; disable for now
     // _sum_unique_antinode_locations();
-    sum_unique_antinode_locations_accounting_for_resonant_harmonics();
+    // day 8 part 2 is slow; disable for now
+    // _sum_unique_antinode_locations_accounting_for_resonant_harmonics();
 }
 
 fn calculate_left_right_list_distance() {
@@ -752,10 +753,13 @@ fn _sum_unique_antinode_locations() {
         }
     }
 
-    println!("The sum of unique antinode locations is {}", antinodes.iter().unique().count());
+    println!(
+        "The sum of unique antinode locations is {}",
+        antinodes.iter().unique().count()
+    );
 }
 
-fn sum_unique_antinode_locations_accounting_for_resonant_harmonics() {
+fn _sum_unique_antinode_locations_accounting_for_resonant_harmonics() {
     let input = fs::read_to_string("src/input/day8.txt").unwrap();
     let lab_map: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
     let mut antenna_locations: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
@@ -789,7 +793,7 @@ fn sum_unique_antinode_locations_accounting_for_resonant_harmonics() {
             antinodes.push((x as usize, y as usize)); // each antenna is an antinode
             loop {
                 let antinode = (x + diff_x, y + diff_y);
-                if ! in_bounds(antinode.0, antinode.1) {
+                if !in_bounds(antinode.0, antinode.1) {
                     break;
                 }
 
@@ -802,7 +806,7 @@ fn sum_unique_antinode_locations_accounting_for_resonant_harmonics() {
             antinodes.push((x as usize, y as usize)); // each antenna is an antinode
             loop {
                 let antinode = (x - diff_x, y - diff_y);
-                if ! in_bounds(antinode.0, antinode.1) {
+                if !in_bounds(antinode.0, antinode.1) {
                     break;
                 }
 
@@ -812,5 +816,8 @@ fn sum_unique_antinode_locations_accounting_for_resonant_harmonics() {
         }
     }
 
-    println!("The sum of unique antinode locations is {}", antinodes.iter().unique().count());
+    println!(
+        "The sum of unique antinode locations is {}",
+        antinodes.iter().unique().count()
+    );
 }
