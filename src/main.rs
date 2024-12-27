@@ -21,7 +21,7 @@ fn main() {
     // _sum_unique_antinode_locations();
     // day 8 part 2 is slow; disable for now
     // _sum_unique_antinode_locations_accounting_for_resonant_harmonics();
-    compute_filesystem_checksum_following_compaction();
+    compute_filesystem_checksum_following_block_compaction();
 }
 
 fn calculate_left_right_list_distance() {
@@ -823,7 +823,7 @@ fn _sum_unique_antinode_locations_accounting_for_resonant_harmonics() {
     );
 }
 
-fn compute_filesystem_checksum_following_compaction() {
+fn compute_filesystem_checksum_following_block_compaction() {
     let diskmap = fs::read_to_string("src/input/day9.txt")
         .unwrap()
         .lines()
