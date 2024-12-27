@@ -21,6 +21,7 @@ fn main() {
     // _sum_unique_antinode_locations();
     // day 8 part 2 is slow; disable for now
     // _sum_unique_antinode_locations_accounting_for_resonant_harmonics();
+    compute_filesystem_checksum_following_compaction();
 }
 
 fn calculate_left_right_list_distance() {
@@ -819,5 +820,84 @@ fn _sum_unique_antinode_locations_accounting_for_resonant_harmonics() {
     println!(
         "The sum of unique antinode locations is {}",
         antinodes.iter().unique().count()
+    );
+}
+
+fn compute_filesystem_checksum_following_compaction() {
+    let diskmap = fs::read_to_string("src/input/day9.txt")
+        .unwrap()
+        .lines()
+        .exactly_one()
+        .unwrap()
+        .chars()
+        .map(|c| c.to_digit(10).unwrap() as u64)
+        .collect_vec();
+
+    let mut disk_model = Vec::new();
+    for (id, chunk) in diskmap
+        .clone()
+        .into_iter()
+        .chunks(2)
+        .into_iter()
+        .enumerate()
+    {
+        if let Some((num_file, num_free)) = chunk.collect_tuple() {
+            for _ in 0..num_file {
+                disk_model.push(id);
+            }
+            for _ in 0..num_free {
+                disk_model.push(usize::MAX);
+            }
+        } else {
+            for _ in 0..*diskmap.last().unwrap() {
+                disk_model.push(id);
+            }
+        }
+    }
+
+    let mut compacted_model = disk_model.clone();
+    let mut free_i: usize = 0;
+    let mut file_i: usize = compacted_model.len() - 1;
+    loop {
+        let mut file_id = compacted_model[file_i];
+        while file_id == usize::MAX {
+            file_i -= 1;
+            if file_i <= free_i {
+                break;
+            }
+            file_id = compacted_model[file_i];
+        }
+
+        while compacted_model[free_i] != usize::MAX {
+            free_i += 1;
+            if file_i <= free_i {
+                break;
+            }
+        }
+
+        compacted_model[free_i] = file_id;
+        compacted_model[file_i] = usize::MAX;
+
+        file_i -= 1;
+        free_i += 1;
+        if file_i <= free_i {
+            break;
+        }
+    }
+
+    let checksum = compacted_model
+        .into_iter()
+        .enumerate()
+        .filter_map(|(i, id)| {
+            if id == usize::MAX {
+                None
+            } else {
+                Some(i * id)
+            }
+        })
+        .sum::<usize>();
+    println!(
+        "The filesystem checksum following compaction is {}",
+        checksum
     );
 }
