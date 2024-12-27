@@ -16,7 +16,7 @@ fn main() {
     // day 6 part 2 is slow; disable for now
     // _sum_candidate_obstacle_positions();
     sum_bridge_calibrations_from_two_operations();
-    sum_bridge_calibrations_from_three_operations();
+    // _sum_bridge_calibrations_from_three_operations();
     // day 8 part 1 is slow; disable for now
     // _sum_unique_antinode_locations();
     // day 8 part 2 is slow; disable for now
@@ -704,7 +704,7 @@ fn sum_bridge_calibrations_from_two_operations() {
     sum_bridge_calibrations_from_operations(&vec![("+", |l, r| l + r), ("*", |l, r| l * r)]);
 }
 
-fn sum_bridge_calibrations_from_three_operations() {
+fn _sum_bridge_calibrations_from_three_operations() {
     sum_bridge_calibrations_from_operations(&vec![
         ("+", |l, r| l + r),
         ("*", |l, r| l * r),
