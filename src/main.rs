@@ -24,6 +24,7 @@ fn main() {
     compute_filesystem_checksum_following_block_compaction();
     compute_filesystem_checksum_following_file_compaction();
     sum_scores_of_all_trailheads_on_topo_map();
+    sum_ratings_of_all_trailheads_on_topo_map();
 }
 
 fn calculate_left_right_list_distance() {
@@ -994,37 +995,45 @@ fn trail_step(
     elevation: usize,
     topo_map: &Vec<Vec<u8>>,
     destinations: &mut Vec<(usize, usize)>,
-) -> usize {
+) -> (usize, usize) {
     if elevation == 9 {
         let result = match destinations.binary_search(&(i, j)) {
-            Ok(_) => 0,
+            Ok(_) => (0, 1),
             Err(index) => {
                 destinations.insert(index, (i, j));
-                1
+                (1, 1)
             }
         };
         return result;
     }
 
-    let mut num_trails = 0;
+    let (mut num_dest, mut num_unique) = (0, 0);
 
     if i > 0 && topo_map[i - 1][j] as usize == elevation + 1 {
-        num_trails += trail_step(i - 1, j, elevation + 1, topo_map, destinations);
+        let (d, u) = trail_step(i - 1, j, elevation + 1, topo_map, destinations);
+        num_dest += d;
+        num_unique += u;
     }
 
     if j + 1 < topo_map[i].len() && topo_map[i][j + 1] as usize == elevation + 1 {
-        num_trails += trail_step(i, j + 1, elevation + 1, topo_map, destinations);
+        let (d, u) = trail_step(i, j + 1, elevation + 1, topo_map, destinations);
+        num_dest += d;
+        num_unique += u;
     }
 
     if i + 1 < topo_map.len() && topo_map[i + 1][j] as usize == elevation + 1 {
-        num_trails += trail_step(i + 1, j, elevation + 1, topo_map, destinations);
+        let (d, u) = trail_step(i + 1, j, elevation + 1, topo_map, destinations);
+        num_dest += d;
+        num_unique += u;
     }
 
     if j > 0 && topo_map[i][j - 1] as usize == elevation + 1 {
-        num_trails += trail_step(i, j - 1, elevation + 1, topo_map, destinations);
+        let (d, u) = trail_step(i, j - 1, elevation + 1, topo_map, destinations);
+        num_dest += d;
+        num_unique += u;
     }
 
-    num_trails
+    (num_dest, num_unique)
 }
 
 fn sum_scores_of_all_trailheads_on_topo_map() {
@@ -1052,8 +1061,41 @@ fn sum_scores_of_all_trailheads_on_topo_map() {
     let mut trailhead_scores_sum = 0;
     for (i, j) in trailheads {
         let mut destinations = Vec::new();
-        trailhead_scores_sum += trail_step(i, j, 0, &topo_map, &mut destinations);
+        let (d, _) = trail_step(i, j, 0, &topo_map, &mut destinations);
+        trailhead_scores_sum += d;
     }
 
     println!("The sum of trailhead scores is {}", trailhead_scores_sum);
+}
+
+fn sum_ratings_of_all_trailheads_on_topo_map() {
+    let input = fs::read_to_string("src/input/day10.txt").unwrap();
+    let mut topo_map: Vec<Vec<u8>> = Vec::new();
+    for line in input.lines() {
+        topo_map.push(
+            line.chars()
+                .map(|ch| ch.to_digit(10).unwrap() as u8)
+                .collect_vec(),
+        );
+    }
+
+    // make a pass to discover candidate trailheads
+    let mut trailheads: Vec<(usize, usize)> = Vec::new();
+    for (i, row) in topo_map.iter().enumerate() {
+        for (j, col) in row.iter().enumerate() {
+            if *col == 0 {
+                trailheads.push((i, j));
+            }
+        }
+    }
+
+    // investigate each trailhead to see if there's a trail
+    let mut trailhead_ratings_sum = 0;
+    for (i, j) in trailheads {
+        let mut destinations = Vec::new();
+        let (_, u) = trail_step(i, j, 0, &topo_map, &mut destinations);
+        trailhead_ratings_sum += u;
+    }
+
+    println!("The sum of trailhead ratings is {}", trailhead_ratings_sum);
 }
