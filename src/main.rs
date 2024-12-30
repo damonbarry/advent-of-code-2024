@@ -26,6 +26,7 @@ fn main() {
     sum_scores_of_all_trailheads_on_topo_map();
     sum_ratings_of_all_trailheads_on_topo_map();
     sum_stones_after_25_blinks();
+    sum_stones_after_75_blinks();
 }
 
 fn calculate_left_right_list_distance() {
@@ -1101,36 +1102,86 @@ fn sum_ratings_of_all_trailheads_on_topo_map() {
     println!("The sum of trailhead ratings is {}", trailhead_ratings_sum);
 }
 
-fn sum_stones_after_25_blinks() {
+fn sum_stones_after_n_blinks(blinks: usize) {
     let input = fs::read_to_string("src/input/day11.txt").unwrap();
-    let blinks = 25;
 
-    let mut stones: Vec<u64> = input
+    let mut stones: HashMap<u64, i64> = HashMap::new();
+    for stone in input
         .split_ascii_whitespace()
         .map(|n| n.parse::<u64>().unwrap())
-        .collect();
+    {
+        stones
+            .entry(stone)
+            .and_modify(|count| *count += 1)
+            .or_insert(1);
+    }
 
     for _ in 0..blinks {
-        let mut new_stones: Vec<u64> = Vec::new();
-        for stone in stones.iter() {
-            match stone {
-                0 => new_stones.push(1),
+        let mut new_stones: HashMap<u64, i64> = HashMap::new();
+        for (key, value) in &stones {
+            match key {
+                0 => {
+                    new_stones
+                        .entry(1)
+                        .and_modify(|count| *count += value)
+                        .or_insert(*value);
+                    new_stones
+                        .entry(0)
+                        .and_modify(|count| *count -= value)
+                        .or_insert(-value);
+                }
                 n => {
                     let s = n.to_string();
                     let len = s.len();
                     if len % 2 == 0 {
                         let nums = s.split_at(len / 2);
-                        new_stones.push(nums.0.parse::<u64>().unwrap());
-                        new_stones.push(nums.1.parse::<u64>().unwrap());
+                        new_stones
+                            .entry(nums.0.parse::<u64>().unwrap())
+                            .and_modify(|count| *count += value)
+                            .or_insert(*value);
+                        new_stones
+                            .entry(nums.1.parse::<u64>().unwrap())
+                            .and_modify(|count| *count += value)
+                            .or_insert(*value);
+                        new_stones
+                            .entry(*n)
+                            .and_modify(|count| *count -= value)
+                            .or_insert(-value);
                     } else {
-                        new_stones.push(n * 2024);
+                        new_stones
+                            .entry(n * 2024)
+                            .and_modify(|count| *count += value)
+                            .or_insert(*value);
+                        new_stones
+                            .entry(*n)
+                            .and_modify(|count| *count -= value)
+                            .or_insert(-value);
                     }
                 }
             }
         }
 
-        stones = new_stones;
+        for (stone, count) in new_stones {
+            stones
+                .entry(stone)
+                .and_modify(|c| *c += count)
+                .or_insert(count);
+        }
+
+        stones.retain(|_, v| *v > 0);
     }
 
-    println!("Number of stones after blinking 25 times is {}", stones.len());
+    println!(
+        "Number of stones after blinking {} times is {}",
+        blinks,
+        stones.values().sum::<i64>()
+    );
+}
+
+fn sum_stones_after_25_blinks() {
+    sum_stones_after_n_blinks(25);
+}
+
+fn sum_stones_after_75_blinks() {
+    sum_stones_after_n_blinks(75);
 }
