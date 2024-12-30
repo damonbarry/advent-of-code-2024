@@ -25,6 +25,7 @@ fn main() {
     compute_filesystem_checksum_following_file_compaction();
     sum_scores_of_all_trailheads_on_topo_map();
     sum_ratings_of_all_trailheads_on_topo_map();
+    sum_stones_after_25_blinks();
 }
 
 fn calculate_left_right_list_distance() {
@@ -1098,4 +1099,38 @@ fn sum_ratings_of_all_trailheads_on_topo_map() {
     }
 
     println!("The sum of trailhead ratings is {}", trailhead_ratings_sum);
+}
+
+fn sum_stones_after_25_blinks() {
+    let input = fs::read_to_string("src/input/day11.txt").unwrap();
+    let blinks = 25;
+
+    let mut stones: Vec<u64> = input
+        .split_ascii_whitespace()
+        .map(|n| n.parse::<u64>().unwrap())
+        .collect();
+
+    for _ in 0..blinks {
+        let mut new_stones: Vec<u64> = Vec::new();
+        for stone in stones.iter() {
+            match stone {
+                0 => new_stones.push(1),
+                n => {
+                    let s = n.to_string();
+                    let len = s.len();
+                    if len % 2 == 0 {
+                        let nums = s.split_at(len / 2);
+                        new_stones.push(nums.0.parse::<u64>().unwrap());
+                        new_stones.push(nums.1.parse::<u64>().unwrap());
+                    } else {
+                        new_stones.push(n * 2024);
+                    }
+                }
+            }
+        }
+
+        stones = new_stones;
+    }
+
+    println!("Number of stones after blinking 25 times is {}", stones.len());
 }
