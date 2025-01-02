@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::{collections::HashMap, fs};
+use std::{cell::RefCell, collections::HashMap, fs};
 
 fn main() {
     calculate_left_right_list_distance();
@@ -27,6 +27,7 @@ fn main() {
     sum_ratings_of_all_trailheads_on_topo_map();
     sum_stones_after_25_blinks();
     sum_stones_after_75_blinks();
+    total_fencing_price_for_all_regions();
 }
 
 fn calculate_left_right_list_distance() {
@@ -1184,4 +1185,126 @@ fn sum_stones_after_25_blinks() {
 
 fn sum_stones_after_75_blinks() {
     sum_stones_after_n_blinks(75);
+}
+
+#[derive(Clone, Debug)]
+struct PlotDetails {
+    region: Option<usize>,
+    neighbors: usize,
+}
+
+impl PlotDetails {
+    pub fn new() -> PlotDetails {
+        PlotDetails {
+            region: None,
+            neighbors: 0,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+struct Plot {
+    position: (usize, usize),
+    details: RefCell<PlotDetails>,
+}
+
+impl Plot {
+    pub fn new(i: usize, j: usize) -> Plot {
+        Plot {
+            position: (i, j),
+            details: RefCell::new(PlotDetails::new()),
+        }
+    }
+}
+
+fn discover_region(
+    plot: &Plot,
+    plots: &Vec<Plot>,
+    region: usize,
+    max: (usize, usize),
+) -> (usize, usize) {
+    assert!(plot.details.borrow().region.is_none());
+
+    let neighbors = vec![
+        if plot.position.0 == 0 {
+            None
+        } else {
+            plots
+                .iter()
+                .find(|p| p.position == (plot.position.0 - 1, plot.position.1))
+        },
+        if plot.position.1 == max.1 {
+            None
+        } else {
+            plots
+                .iter()
+                .find(|p| p.position == (plot.position.0, plot.position.1 + 1))
+        },
+        if plot.position.0 == max.0 {
+            None
+        } else {
+            plots
+                .iter()
+                .find(|p| p.position == (plot.position.0 + 1, plot.position.1))
+        },
+        if plot.position.1 == 0 {
+            None
+        } else {
+            plots
+                .iter()
+                .find(|p| p.position == (plot.position.0, plot.position.1 - 1))
+        },
+    ]
+    .iter()
+    .filter_map(|dir| *dir)
+    .collect_vec();
+
+    let num_neighbors = neighbors.len();
+
+    plot.details.borrow_mut().region = Some(region);
+    plot.details.borrow_mut().neighbors = num_neighbors;
+
+    let mut area = 0;
+    let mut perimeter = 0;
+    for neighbor in neighbors {
+        if neighbor.details.borrow().region.is_none() {
+            let (a, p) = discover_region(neighbor, plots, region, max);
+            area += a;
+            perimeter += p;
+        }
+    }
+
+    return (area + 1, perimeter + 4 - num_neighbors);
+}
+
+fn total_fencing_price_for_all_regions() {
+    let input = fs::read_to_string("src/input/day12.txt").unwrap();
+    let mut max_i = 0;
+    let mut max_j = 0;
+    let mut plot_types: HashMap<char, Vec<Plot>> = HashMap::new();
+    for (i, row) in input.lines().enumerate() {
+        max_i = i;
+        for (j, column) in row.chars().enumerate() {
+            max_j = j;
+            plot_types
+                .entry(column)
+                .and_modify(|plots| plots.push(Plot::new(i, j)))
+                .or_insert(vec![Plot::new(i, j)]);
+        }
+    }
+
+    let plot_types = plot_types;
+    let mut region_id = 0;
+    let mut price = 0;
+    for (_, plots) in plot_types {
+        for plot in &plots {
+            if plot.details.borrow().region.is_none() {
+                let (area, perimeter) = discover_region(plot, &plots, region_id, (max_i, max_j));
+                region_id += 1;
+                price += area * perimeter;
+            }
+        }
+    }
+
+    println!("The total price of fencing all regions is {}", price);
 }
